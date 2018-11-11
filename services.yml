@@ -1,0 +1,15 @@
+s3:
+  Host: localhost
+  Port: 4572
+lambda:
+  Host: localhost
+  Port: 4574
+dynamodb:
+  Host: localhost
+  Port: 4569
+apigateway:
+  Host: localhost
+  Port: 4567
+kinesis:
+  Host: localhost
+  Port: 4568
