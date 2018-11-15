@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 )
+
+const defaultBackendPort = "9000"
 
 var (
 	requestChannel     = make(chan *Request, 100)
@@ -10,21 +13,27 @@ var (
 )
 
 func main() {
-	http.HandleFunc("/", reRequest)
-
-	go http.ListenAndServe(":3000", nil)
+	go http.ListenAndServe(":3000", LocalstackSingleEndpoint{})
+	go http.ListenAndServe(fmt.Sprintf(":%s", defaultBackendPort), DefaultBackend{})
 
 	for {
 		select {
 		case req := <-requestChannel:
-			backend := BackendFor(req.Request)
-			go forward(req, backend)
+			go func() {
+				backend := BackendFor(req.Request)
+				forward(req, backend)
+			}()
 		}
 	}
 }
 
-func reRequest(res http.ResponseWriter, req *http.Request) {
-	done := make(chan bool)
+// LocalstackSingleEndpoint represents the the proxy server
+type LocalstackSingleEndpoint struct {
+	http.Handler
+}
+
+func (LocalstackSingleEndpoint) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	done := make(chan bool, 1)
 	request := &Request{
 		ResponseWriter: res,
 		Request:        req,
@@ -33,4 +42,14 @@ func reRequest(res http.ResponseWriter, req *http.Request) {
 
 	requestChannel <- request
 	<-done
+}
+
+// DefaultBackend gets all requests that can't be handled by localstack
+type DefaultBackend struct {
+	http.Handler
+}
+
+func (DefaultBackend) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	res.WriteHeader(http.StatusBadRequest)
+	res.Write([]byte("No localstack backend for this request"))
 }
