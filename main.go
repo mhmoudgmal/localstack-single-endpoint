@@ -4,7 +4,10 @@ import (
 	"net/http"
 )
 
-var requestChannel = make(chan *Request, 100)
+var (
+	requestChannel   = make(chan *Request, 100)
+	servicesBackends = getSupportedServices()
+)
 
 func main() {
 	http.HandleFunc("/", reRequest)
@@ -14,8 +17,8 @@ func main() {
 	for {
 		select {
 		case req := <-requestChannel:
-			backend := backendFor(req.Request)
-			go forward(backend, req)
+			backend := BackendFor(req.Request)
+			go forward(req, backend)
 		}
 	}
 }

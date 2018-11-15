@@ -15,7 +15,7 @@ type Request struct {
 	Done chan bool // channel to notify when the request has finsihed.
 }
 
-func forward(backend Backend, req *Request) {
+func forward(req *Request, backend Backend) {
 	reqURL, _ := url.Parse(req.Request.URL.String())
 
 	reqURL.Scheme = "http"
@@ -26,7 +26,6 @@ func forward(backend Backend, req *Request) {
 		reqURL.String(),
 		req.Request.Body,
 	)
-
 	if reqErr != nil {
 		fmt.Println("Failed creating new request", reqErr)
 		req.ResponseWriter.WriteHeader(500)

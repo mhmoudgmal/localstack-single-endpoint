@@ -7,10 +7,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// Services ....................
-type Services map[string]Backend
-
-func allServices() (services Services) {
+func getSupportedServices() (services map[string]Backend) {
 	content, readErr := ioutil.ReadFile("services.yml")
 	if readErr != nil {
 		panic(readErr)
@@ -23,8 +20,8 @@ func allServices() (services Services) {
 }
 
 func servicesNames() (servicesNames []string) {
-	for service := range allServices() {
-		servicesNames = append(servicesNames, service)
+	for serviceName := range servicesBackends {
+		servicesNames = append(servicesNames, serviceName)
 	}
 	return
 }
