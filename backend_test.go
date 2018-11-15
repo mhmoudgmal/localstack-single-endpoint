@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 func awsRequestLikeFor(serviceName string) (request *http.Request) {
@@ -27,9 +29,7 @@ func TestBackend_String(t *testing.T) {
 	expected := "localhost:1111"
 	got := backend.String()
 
-	if got != expected {
-		t.Errorf("expected: (%v) got: (%v)", expected, got)
-	}
+	assert.Equal(t, expected, got)
 }
 
 func TestBackendFor_missingAuthorization(t *testing.T) {
@@ -42,9 +42,7 @@ func TestBackendFor_missingAuthorization(t *testing.T) {
 	expected := Backend{}
 	got := BackendFor(request)
 
-	if got != expected {
-		t.Errorf("expected (%v) got (%v)", expected, got)
-	}
+	assert.Equal(t, expected, got)
 }
 
 func TestBackendFor_inValidCredential(t *testing.T) {
@@ -58,9 +56,7 @@ func TestBackendFor_inValidCredential(t *testing.T) {
 	expected := Backend{}
 	got := BackendFor(request)
 
-	if got != expected {
-		t.Errorf("expected (%v) got (%v)", expected, got)
-	}
+	assert.Equal(t, expected, got)
 }
 
 func TestBackendFor_apigateway(t *testing.T) {
@@ -72,13 +68,11 @@ func TestBackendFor_apigateway(t *testing.T) {
 	expected := Backend{Host: "localhost", Port: "4567"}
 	got := BackendFor(request)
 
-	if got != expected {
-		t.Errorf("expected (%v) got (%v)", expected, got)
-	}
+	assert.Equal(t, expected, got)
 }
 
 func TestBackendFor(t *testing.T) {
-	services := map[string]Backend{
+	services := Services{
 		"s3":       Backend{Host: "localhost", Port: "4572"},
 		"lambda":   Backend{Host: "localhost", Port: "4574"},
 		"dynamodb": Backend{Host: "localhost", Port: "4569"},
@@ -90,8 +84,6 @@ func TestBackendFor(t *testing.T) {
 
 		got := BackendFor(request)
 
-		if got != expectedBackend {
-			t.Errorf("expected (%v) got (%v)", expectedBackend, got)
-		}
+		assert.Equal(t, expectedBackend, got)
 	}
 }

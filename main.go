@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	requestChannel   = make(chan *Request, 100)
-	servicesBackends = getSupportedServices()
+	requestChannel     = make(chan *Request, 100)
+	localstackServices = DefaultLocalstackEndpoints()
 )
 
 func main() {

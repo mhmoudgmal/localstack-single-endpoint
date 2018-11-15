@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
 )
 
-var serviceNamesRegx = fmt.Sprintf(`%s`, strings.Join(servicesNames(), "|"))
+var serviceNamesRegx = fmt.Sprintf(`%s`,
+	strings.Join(localstackServices.Names(), "|"))
 
 const (
 	regionRegx       = `(?:eu|us)\-(?:east|west|central)\-\d{1}`
@@ -41,7 +43,7 @@ func BackendFor(req *http.Request) (backend Backend) {
 	apigatewayRgx := regexp.MustCompile(apigatewayURLRegx)
 
 	if apigatewayRgx.MatchString(req.URL.String()) {
-		backend = servicesBackends["apigateway"]
+		backend = localstackServices["apigateway"]
 		return
 	}
 
@@ -49,7 +51,7 @@ func BackendFor(req *http.Request) (backend Backend) {
 	var found bool
 
 	if authorizationHeader, found = req.Header["Authorization"]; !found {
-		fmt.Errorf("Authorization header is missing")
+		log.Println("[WARNING]: Authorization header is missing")
 		return
 	}
 
@@ -67,10 +69,10 @@ func BackendFor(req *http.Request) (backend Backend) {
 	)
 
 	if len(matchedCredentialRgx) < 5 {
-		fmt.Errorf("Credential header does not match AWS's format")
+		log.Println("[WARNING]: Credential header does not match AWS's format")
 		return
 	}
 
-	backend = servicesBackends[matchedCredentialRgx[4]]
+	backend = localstackServices[matchedCredentialRgx[4]]
 	return
 }

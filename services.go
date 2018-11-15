@@ -7,20 +7,26 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-func getSupportedServices() (services map[string]Backend) {
+// Services represents AWS services as localstack backends
+type Services map[string]Backend
+
+// DefaultLocalstackEndpoints returns the default localstack endpoints -
+// mentioned in localstack: https://github.com/localstack/localstack#overview
+func DefaultLocalstackEndpoints() (services Services) {
 	content, readErr := ioutil.ReadFile("services.yml")
 	if readErr != nil {
-		panic(readErr)
+		log.Fatalf("[ERROR]: %v", readErr)
 	}
 
 	if parseErr := yaml.Unmarshal([]byte(content), &services); parseErr != nil {
-		log.Fatalf("error: %v", parseErr)
+		log.Fatalf("[ERROR]: %v", parseErr)
 	}
 	return
 }
 
-func servicesNames() (servicesNames []string) {
-	for serviceName := range servicesBackends {
+// Names returns the services names of the currently supported services.
+func (services Services) Names() (servicesNames []string) {
+	for serviceName := range services {
 		servicesNames = append(servicesNames, serviceName)
 	}
 	return
