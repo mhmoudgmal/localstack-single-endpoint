@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mhmoudgmal/localstack-single-endpoint.svg?branch=master)](https://travis-ci.org/mhmoudgmal/localstack-single-endpoint)
+[![Build Status](https://travis-ci.org/mhmoudgmal/localstack-single-endpoint.svg?branch=master)](https://travis-ci.org/mhmoudgmal/localstack-single-endpoint) [![Go Report Card](https://goreportcard.com/badge/github.com/mhmoudgmal/localstack-single-endpoint)](https://goreportcard.com/report/github.com/mhmoudgmal/localstack-single-endpoint)
 
 Localstack single endpoint
 ---
