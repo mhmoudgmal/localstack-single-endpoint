@@ -14,7 +14,7 @@ func credentialFor(serviceName string) string {
 }
 
 func setupDefaultBackend() {
-	go http.ListenAndServe(":9000", DefaultBackend{})
+	go http.ListenAndServe(fmt.Sprintf(":%s", defaultBackendPort), DefaultBackend{})
 }
 
 // A simplified version of the <LocalstackSingleEndpoint> http handler

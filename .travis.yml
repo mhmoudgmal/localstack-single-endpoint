@@ -8,6 +8,10 @@ go:
 install:
   - go get gopkg.in/yaml.v2
   - go get gotest.tools/assert
+  - go get github.com/mattn/goveralls
 
 script:
- - go test
+ - go test -v -covermode=count -coverprofile=coverage.out
+
+after_success:
+  - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
