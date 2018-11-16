@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Request is the http request that will be forwarded to the downstream service.
@@ -21,53 +22,51 @@ func forward(req *Request, backend Backend) {
 	reqURL.Scheme = "http"
 	reqURL.Host = backend.String()
 
-	newRequest, reqErr := http.NewRequest(
-		req.Request.Method,
-		reqURL.String(),
-		req.Request.Body,
-	)
-	if reqErr != nil {
-		fmt.Println("Failed creating new request", reqErr)
-		req.ResponseWriter.WriteHeader(500)
-		req.ResponseWriter.Write([]byte(http.StatusText(500)))
+	newRequest, newReqErr := http.NewRequest(req.Request.Method,
+		reqURL.String(), req.Request.Body)
+
+	if newReqErr != nil {
+		log.Printf("[WARNING]: Failed forwarding the request to %s: %v",
+			backend.String(), newReqErr)
+
+		req.ResponseWriter.WriteHeader(http.StatusUnprocessableEntity)
+		req.ResponseWriter.Write([]byte(newReqErr.Error()))
 		req.Done <- true
 		return
 	}
 
-	// Copy all headers from the origianl request to the new request
-	for k, v := range req.Request.Header {
-		headerVals := ""
-		for _, headerVal := range v {
-			headerVals += headerVal + " "
-		}
+	copyRequestHeaders(req.Request, newRequest)
 
-		newRequest.Header.Add(k, headerVals)
-	}
-
-	fmt.Printf("Request at [ %s ] is forwarded to %s\n",
-		req.Request.URL.String(), newRequest.Host)
+	log.Printf("[INFO]: Request at [%s]{} is forwarded to [%s]",
+		req.Request.URL.String(),
+		newRequest.Host)
 
 	client := http.Client{}
 	res, reqErr := client.Do(newRequest)
 
 	if reqErr != nil {
-		// FIXME: handle response properly, not all error are 500!
-		req.ResponseWriter.WriteHeader(http.StatusInternalServerError)
+		req.ResponseWriter.WriteHeader(http.StatusBadGateway)
+		req.ResponseWriter.Write([]byte(reqErr.Error()))
 		req.Done <- true
 		return
 	}
 
-	// Copy all the headers from the response to the original response writer.
-	for k, v := range res.Header {
-		headerVals := ""
-		for _, headerVal := range v {
-			headerVals += headerVal + " "
-		}
-
-		req.ResponseWriter.Header().Add(k, headerVals)
-	}
+	copyResponseHeaders(res, req)
+	req.ResponseWriter.WriteHeader(res.StatusCode)
 
 	io.Copy(req.ResponseWriter, res.Body)
 
 	req.Done <- true
+}
+
+func copyRequestHeaders(originalRequest, newRequest *http.Request) {
+	for k, v := range originalRequest.Header {
+		newRequest.Header.Add(k, strings.Join(v, " "))
+	}
+}
+
+func copyResponseHeaders(newResponse *http.Response, req *Request) {
+	for k, v := range newResponse.Header {
+		req.ResponseWriter.Header().Add(k, strings.Join(v, " "))
+	}
 }

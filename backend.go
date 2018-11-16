@@ -40,8 +40,9 @@ func (backend Backend) String() string {
 //
 // except for the REST apis that should be forwarded to apigateway endpoint
 func BackendFor(req *http.Request) (backend Backend) {
-	apigatewayRgx := regexp.MustCompile(apigatewayURLRegx)
+	backend = Backend{"", defaultBackendPort}
 
+	apigatewayRgx := regexp.MustCompile(apigatewayURLRegx)
 	if apigatewayRgx.MatchString(req.URL.String()) {
 		backend = localstackServices["apigateway"]
 		return
@@ -63,7 +64,6 @@ func BackendFor(req *http.Request) (backend Backend) {
 	)
 
 	credentialHeaderRgx := regexp.MustCompile(credentialFmt)
-
 	matchedCredentialRgx := credentialHeaderRgx.FindStringSubmatch(
 		authorizationHeader[0],
 	)

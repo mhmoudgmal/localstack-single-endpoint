@@ -39,7 +39,7 @@ func TestBackendFor_missingAuthorization(t *testing.T) {
 		nil,
 	)
 
-	expected := Backend{}
+	expected := Backend{"", "9000"}
 	got := BackendFor(request)
 
 	assert.Equal(t, expected, got)
@@ -53,7 +53,7 @@ func TestBackendFor_inValidCredential(t *testing.T) {
 	)
 
 	request.Header["Authorization"] = []string{"Credential="}
-	expected := Backend{}
+	expected := Backend{"", "9000"}
 	got := BackendFor(request)
 
 	assert.Equal(t, expected, got)
