@@ -1,26 +1,39 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 )
 
-const defaultBackendPort = "9000"
-
 var (
+	// ProxyPort the main proxy port
+	ProxyPort string
+	// DefaultBackendPort the fallback backend port
+	DefaultBackendPort string
+
 	requestChannel     = make(chan *Request, 100)
 	localstackServices = DefaultLocalstackEndpoints()
 )
 
 func main() {
-	go http.ListenAndServe(":3000", LocalstackSingleEndpoint{})
-	go http.ListenAndServe(fmt.Sprintf(":%s", defaultBackendPort), DefaultBackend{})
+	flag.StringVar(&ProxyPort, "ProxyPort", "9000",
+		"the main application port")
+
+	flag.StringVar(&DefaultBackendPort, "DefaultBackendPort", "9001",
+		"the backend port for the application to fallback to in case no localstack backend found for a request",
+	)
+
+	flag.Parse()
+
+	go http.ListenAndServe(fmt.Sprintf(":%s", ProxyPort), LocalstackSingleEndpoint{})
+	go http.ListenAndServe(fmt.Sprintf(":%s", DefaultBackendPort), DefaultBackend{})
 
 	for {
 		select {
 		case req := <-requestChannel:
 			go func() {
-				backend := BackendFor(req.Request)
+				backend := BackendFor(req.Request, Backend{"", DefaultBackendPort})
 				forward(req, backend)
 			}()
 		}

@@ -2,19 +2,17 @@ package main
 
 import (
 	"fmt"
-	"gotest.tools/assert"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
 	"testing"
+	"time"
+
+	"gotest.tools/assert"
 )
 
 func credentialFor(serviceName string) string {
 	return fmt.Sprintf("Credential=AKIAIOSFODNN7EXAMPLE/20181117/us-east-1/%s/aws4_request", serviceName)
-}
-
-func setupDefaultBackend() {
-	go http.ListenAndServe(fmt.Sprintf(":%s", defaultBackendPort), DefaultBackend{})
 }
 
 // A simplified version of the <LocalstackSingleEndpoint> http handler
@@ -26,13 +24,14 @@ func reRequest(res http.ResponseWriter, req *http.Request) {
 		Done:           done,
 	}
 
-	backend := BackendFor(reReq.Request)
+	backend := BackendFor(reReq.Request, Backend{"", "9001"})
 	go forward(reReq, backend)
 	<-done
 }
 
 func TestForward_noLocalstackBackendDetected(t *testing.T) {
-	setupDefaultBackend()
+	go http.ListenAndServe(":9001", DefaultBackend{})
+	time.Sleep(150 * time.Millisecond)
 
 	req, err := http.NewRequest("POST", "/", nil)
 	if err != nil {

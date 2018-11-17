@@ -8,6 +8,8 @@ import (
 	"gotest.tools/assert"
 )
 
+var defaultBackend = Backend{"", "9001"}
+
 func awsRequestLikeFor(serviceName string) (request *http.Request) {
 	request, _ = http.NewRequest(
 		"POST",
@@ -39,8 +41,8 @@ func TestBackendFor_missingAuthorization(t *testing.T) {
 		nil,
 	)
 
-	expected := Backend{"", "9000"}
-	got := BackendFor(request)
+	expected := defaultBackend
+	got := BackendFor(request, defaultBackend)
 
 	assert.Equal(t, expected, got)
 }
@@ -53,8 +55,8 @@ func TestBackendFor_inValidCredential(t *testing.T) {
 	)
 
 	request.Header["Authorization"] = []string{"Credential="}
-	expected := Backend{"", "9000"}
-	got := BackendFor(request)
+	expected := defaultBackend
+	got := BackendFor(request, defaultBackend)
 
 	assert.Equal(t, expected, got)
 }
@@ -66,7 +68,7 @@ func TestBackendFor_apigateway(t *testing.T) {
 		nil,
 	)
 	expected := Backend{Host: "localhost", Port: "4567"}
-	got := BackendFor(request)
+	got := BackendFor(request, defaultBackend)
 
 	assert.Equal(t, expected, got)
 }
@@ -82,7 +84,7 @@ func TestBackendFor(t *testing.T) {
 	for serviceName, expectedBackend := range services {
 		request := awsRequestLikeFor(serviceName)
 
-		got := BackendFor(request)
+		got := BackendFor(request, defaultBackend)
 
 		assert.Equal(t, expectedBackend, got)
 	}
