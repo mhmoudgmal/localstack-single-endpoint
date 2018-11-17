@@ -39,8 +39,8 @@ func (backend Backend) String() string {
 //	  <your-access-key-id>/<date>/<aws-region>/<aws-service>/aws4_request
 //
 // except for the REST apis that should be forwarded to apigateway endpoint
-func BackendFor(req *http.Request) (backend Backend) {
-	backend = Backend{"", defaultBackendPort}
+func BackendFor(req *http.Request, defaultBackend Backend) (backend Backend) {
+	backend = defaultBackend
 
 	apigatewayRgx := regexp.MustCompile(apigatewayURLRegx)
 	if apigatewayRgx.MatchString(req.URL.String()) {
