@@ -7,33 +7,37 @@ import (
 )
 
 var (
-	// ProxyPort the main proxy port
-	ProxyPort string
-	// DefaultBackendPort the fallback backend port
-	DefaultBackendPort string
+	proxyPort          string
+	localstackHost     string
+	defaultBackendPort string
 
 	requestChannel     = make(chan *Request, 100)
 	localstackServices = DefaultLocalstackEndpoints()
 )
 
 func main() {
-	flag.StringVar(&ProxyPort, "ProxyPort", "9000",
+	flag.StringVar(&proxyPort, "proxyPort", "9000",
 		"the main application port")
 
-	flag.StringVar(&DefaultBackendPort, "DefaultBackendPort", "9001",
+	flag.StringVar(&defaultBackendPort, "defaultBackendPort", "9001",
 		"the backend port for the application to fallback to in case no localstack backend found for a request",
 	)
 
+	flag.StringVar(&localstackHost, "localstackHost", "localhost",
+		"the host where localstack is running and accessible")
+
 	flag.Parse()
 
-	go http.ListenAndServe(fmt.Sprintf(":%s", ProxyPort), LocalstackSingleEndpoint{})
-	go http.ListenAndServe(fmt.Sprintf(":%s", DefaultBackendPort), DefaultBackend{})
+	go http.ListenAndServe(fmt.Sprintf(":%s", proxyPort),
+		LocalstackSingleEndpoint{LocalstackHost: localstackHost})
+
+	go http.ListenAndServe(fmt.Sprintf(":%s", defaultBackendPort), DefaultBackend{})
 
 	for {
 		select {
 		case req := <-requestChannel:
 			go func() {
-				backend := BackendFor(req.Request, Backend{"", DefaultBackendPort})
+				backend := BackendFor(req.Request, Backend{"", defaultBackendPort})
 				forward(req, backend)
 			}()
 		}
@@ -43,11 +47,13 @@ func main() {
 // LocalstackSingleEndpoint represents the the proxy server
 type LocalstackSingleEndpoint struct {
 	http.Handler
+	LocalstackHost string
 }
 
-func (LocalstackSingleEndpoint) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (l LocalstackSingleEndpoint) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	done := make(chan bool, 1)
 	request := &Request{
+		LocalstackHost: l.LocalstackHost,
 		ResponseWriter: res,
 		Request:        req,
 		Done:           done,

@@ -10,8 +10,7 @@ How to use?
 ---
 #### Docker
 
-- Run the docker container `docker run -p 9000:9000 mhmoudgmal/localstack-single-endpoint`
-- Then you can access localstack using a single endpoint port (9000).
+- Run the docker container `docker run -p 9000:9000 -e "LOCALSTACK_HOST=172.17.0.2" mhmoudgmal/localstack-single-endpoint` Then you can access localstack using a single endpoint port (9000).
 
 For example invoking a lambda will be the same as for listing the tables in a dynamodb:
 
