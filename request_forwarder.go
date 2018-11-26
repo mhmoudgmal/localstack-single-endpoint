@@ -10,6 +10,8 @@ import (
 
 // Request is the http request that will be forwarded to the downstream service.
 type Request struct {
+	LocalstackHost string
+
 	*http.Request
 	http.ResponseWriter
 
@@ -20,6 +22,9 @@ func forward(req *Request, backend Backend) {
 	reqURL, _ := url.Parse(req.Request.URL.String())
 
 	reqURL.Scheme = "http"
+	if req.LocalstackHost != "" {
+		backend.Host = req.LocalstackHost
+	}
 	reqURL.Host = backend.String()
 
 	newRequest, newReqErr := http.NewRequest(req.Request.Method,
