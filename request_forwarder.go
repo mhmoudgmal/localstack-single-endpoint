@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -27,8 +29,9 @@ func forward(req *Request, backend Backend) {
 	}
 	reqURL.Host = backend.String()
 
+	reqBody, _ := ioutil.ReadAll(req.Request.Body)
 	newRequest, newReqErr := http.NewRequest(req.Request.Method,
-		reqURL.String(), req.Request.Body)
+		reqURL.String(), bytes.NewBuffer(reqBody))
 
 	if newReqErr != nil {
 		log.Printf("[WARNING]: Failed forwarding the request to %s: %v",

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -33,7 +34,7 @@ func TestForward_noLocalstackBackendDetected(t *testing.T) {
 	go http.ListenAndServe(":9001", DefaultBackend{})
 	time.Sleep(150 * time.Millisecond)
 
-	req, err := http.NewRequest("POST", "/", nil)
+	req, err := http.NewRequest("POST", "/", bytes.NewBuffer([]byte("")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +60,8 @@ func TestForward_supportedLocalstackBackends(t *testing.T) {
 	r := regexp.MustCompile(expectedBodyRegx)
 
 	for _, service := range services {
-		req, err := http.NewRequest("POST", "/", nil)
+
+		req, err := http.NewRequest("POST", "/", bytes.NewBuffer([]byte("")))
 		if err != nil {
 			t.Fatal(err)
 		}
