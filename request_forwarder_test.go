@@ -54,7 +54,7 @@ func TestForward_noLocalstackBackendDetected(t *testing.T) {
 }
 
 func TestForward_supportedLocalstackBackends(t *testing.T) {
-	services := []string{"s3", "lambda", "apigateway", "dynamodb", "kinesis"}
+	services := []string{"s3", "lambda", "apigateway", "dynamodb", "kinesis", "sns", "sqs"}
 
 	expectedBodyRegx := `^Post http://.*:\d{4}/: dial tcp .*:\d{4}: .*: connection refused$`
 	r := regexp.MustCompile(expectedBodyRegx)
