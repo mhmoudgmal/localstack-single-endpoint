@@ -13,3 +13,9 @@ apigateway:
 kinesis:
   Host: localhost
   Port: 4568
+sns:
+  Host: localhost
+  Port: 4575
+sqs:
+  Host: localhost
+  Port: 4576

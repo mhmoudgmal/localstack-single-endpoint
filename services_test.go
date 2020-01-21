@@ -13,6 +13,8 @@ var services = Services{
 	"kinesis":    Backend{Host: "localhost", Port: "4568"},
 	"dynamodb":   Backend{Host: "localhost", Port: "4569"},
 	"apigateway": Backend{Host: "localhost", Port: "4567"},
+	"sns":        Backend{Host: "localhost", Port: "4575"},
+	"sqs":        Backend{Host: "localhost", Port: "4576"},
 }
 
 func TestDefaultLocalstackEndpointst(t *testing.T) {
@@ -23,7 +25,7 @@ func TestDefaultLocalstackEndpointst(t *testing.T) {
 }
 
 func TestNames(t *testing.T) {
-	expectedServicesNames := []string{"s3", "lambda", "kinesis", "dynamodb", "apigateway"}
+	expectedServicesNames := []string{"s3", "lambda", "kinesis", "dynamodb", "apigateway", "sns", "sqs"}
 	got := services.Names()
 
 	sort.Strings(got)
