@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mhmoudgmal/localstack-single-endpoint.svg?branch=master)](https://travis-ci.org/mhmoudgmal/localstack-single-endpoint) [![Go Report Card](https://goreportcard.com/badge/github.com/mhmoudgmal/localstack-single-endpoint)](https://goreportcard.com/report/github.com/mhmoudgmal/localstack-single-endpoint) [![Coverage Status](https://coveralls.io/repos/github/mhmoudgmal/localstack-single-endpoint/badge.svg?branch=add-coverall)](https://coveralls.io/github/mhmoudgmal/localstack-single-endpoint?branch=add-coverall)
+[![Build Status](https://travis-ci.com/mhmoudgmal/localstack-single-endpoint.svg?branch=master)](https://travis-ci.com/mhmoudgmal/localstack-single-endpoint) [![Go Report Card](https://goreportcard.com/badge/github.com/mhmoudgmal/localstack-single-endpoint)](https://goreportcard.com/report/github.com/mhmoudgmal/localstack-single-endpoint) [![Coverage Status](https://coveralls.io/repos/github/mhmoudgmal/localstack-single-endpoint/badge.svg?branch=add-coverall)](https://coveralls.io/github/mhmoudgmal/localstack-single-endpoint?branch=add-coverall)
 
 Localstack single endpoint
 ---
