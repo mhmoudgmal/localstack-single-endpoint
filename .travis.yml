@@ -1,5 +1,7 @@
 language: go
+
 sudo: false
+
 go:
   - 1.11.x
   - 1.12.x
@@ -14,3 +16,15 @@ script:
 
 after_success:
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+
+bfore_deploy:
+  - TAG=$(git describe --tags)
+  - make docker-build
+
+deploy:
+  provider: script
+  script: make docker-push
+  on:
+    branch: "master"
+    tags: true
+  condition: ${GIT_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]$
