@@ -53,19 +53,44 @@ func TestForward_noLocalstackBackendDetected(t *testing.T) {
 	assert.Equal(t, expectedBody, rr.Body.String())
 }
 
-func TestForward_supportedLocalstackBackends(t *testing.T) {
-	services := []string{"s3", "lambda", "apigateway", "dynamodb", "kinesis", "sns", "sqs"}
+func TestForward(t *testing.T) {
+	t.Run("supportedLocalstackBackends", func(t *testing.T) {
+		services := []string{"s3", "lambda", "apigateway", "dynamodb", "kinesis", "sns", "sqs"}
 
-	expectedBodyRegx := `^Post http://.*:\d{4}/: dial tcp .*:\d{4}: .*: connection refused$`
-	r := regexp.MustCompile(expectedBodyRegx)
+		expectedBodyRegx := `^Post http://.*:\d{4}/: dial tcp .*:\d{4}: .*: connection refused$`
+		r := regexp.MustCompile(expectedBodyRegx)
 
-	for _, service := range services {
+		for _, service := range services {
+			req, err := http.NewRequest("POST", "/", bytes.NewBuffer([]byte("")))
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Add("Authorization", credentialFor(service))
 
-		req, err := http.NewRequest("POST", "/", bytes.NewBuffer([]byte("")))
+			rr := httptest.NewRecorder()
+
+			handler := http.HandlerFunc(reRequest)
+			handler.ServeHTTP(rr, req)
+
+			if status := rr.Code; status != http.StatusBadGateway {
+				t.Errorf("wrong status code returned: got %v want %v",
+					status, http.StatusBadRequest)
+			}
+
+			if !r.MatchString(rr.Body.String()) {
+				t.Errorf("response body differes: expected body to match (%v) got(%v)",
+					expectedBodyRegx, rr.Body.String())
+			}
+		}
+	})
+
+	t.Run("supportedPresignedUrl", func(t *testing.T) {
+		presignedUrl := `/bucket/file.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJWGQXSV5V6I2OABQ/20200206/us-east-1/s3/aws4_request&X-Amz-Date=20200206T134953Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=9ebab2d9883d`
+
+		req, err := http.NewRequest("PUT", presignedUrl, bytes.NewBuffer([]byte("")))
 		if err != nil {
 			t.Fatal(err)
 		}
-		req.Header.Add("Authorization", credentialFor(service))
 
 		rr := httptest.NewRecorder()
 
@@ -77,9 +102,11 @@ func TestForward_supportedLocalstackBackends(t *testing.T) {
 				status, http.StatusBadRequest)
 		}
 
+		expectedBodyRegx := `^Put http:\/\/.*:\d{4}\/.*\/.*\.json\?((.*=.*)&?){1}: dial tcp .*:\d{4}: .*: connection refused$`
+		r := regexp.MustCompile(expectedBodyRegx)
 		if !r.MatchString(rr.Body.String()) {
 			t.Errorf("response body differes: expected body to match (%v) got(%v)",
 				expectedBodyRegx, rr.Body.String())
 		}
-	}
+	})
 }

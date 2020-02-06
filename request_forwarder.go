@@ -61,6 +61,7 @@ func forward(req *Request, backend Backend) {
 
 	copyResponseHeaders(res, req)
 	req.ResponseWriter.WriteHeader(res.StatusCode)
+	req.ResponseWriter.Header().Add("Access-Control-Allow-Origin", "*")
 
 	io.Copy(req.ResponseWriter, res.Body)
 

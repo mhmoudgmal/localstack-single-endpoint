@@ -48,12 +48,18 @@ func BackendFor(req *http.Request, defaultBackend Backend) (backend Backend) {
 		return
 	}
 
-	var authorizationHeader []string
+	var headerCredential []string
 	var found bool
 
-	if authorizationHeader, found = req.Header["Authorization"]; !found {
-		log.Println("[WARNING]: Authorization header is missing")
-		return
+	if headerCredential, found = req.Header["Authorization"]; !found {
+		var queryCredential []string
+
+		if queryCredential, found = req.URL.Query()["X-Amz-Credential"]; !found {
+			log.Println("[WARNING]: AWS's credential is missing")
+			return
+		}
+
+		headerCredential = append(headerCredential, "Credential="+queryCredential[0])
 	}
 
 	credentialFmt := fmt.Sprintf(`Credential=(%s)/(%s)/(%s)/(%s)/aws4_request`,
@@ -65,7 +71,7 @@ func BackendFor(req *http.Request, defaultBackend Backend) (backend Backend) {
 
 	credentialHeaderRgx := regexp.MustCompile(credentialFmt)
 	matchedCredentialRgx := credentialHeaderRgx.FindStringSubmatch(
-		authorizationHeader[0],
+		headerCredential[0],
 	)
 
 	if len(matchedCredentialRgx) < 5 {
