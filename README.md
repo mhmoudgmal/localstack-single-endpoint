@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.com/mhmoudgmal/localstack-single-endpoint.svg?branch=master)](https://travis-ci.com/mhmoudgmal/localstack-single-endpoint) [![Go Report Card](https://goreportcard.com/badge/github.com/mhmoudgmal/localstack-single-endpoint)](https://goreportcard.com/report/github.com/mhmoudgmal/localstack-single-endpoint) [![Coverage Status](https://coveralls.io/repos/github/mhmoudgmal/localstack-single-endpoint/badge.svg?branch=add-coverall)](https://coveralls.io/github/mhmoudgmal/localstack-single-endpoint?branch=add-coverall)
 
+_DEPRECATED_ in favor of [localstack/pull/2250](https://github.com/localstack/localstack/pull/2250)
+
+
 Localstack single endpoint
 ---
 
